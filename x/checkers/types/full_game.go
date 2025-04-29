@@ -1,8 +1,9 @@
 package types
 
 import (
-	sdkerrors "cosmossdk.io/errors"
 	"fmt"
+
+	sdkerrors "cosmossdk.io/errors"
 	"github.com/alice/checkers/x/checkers/rules"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
