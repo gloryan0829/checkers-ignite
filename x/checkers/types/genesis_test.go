@@ -1,66 +1,64 @@
 package types_test
 
 import (
+	"github.com/alice/checkers/testutil/sample"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"testing"
 
 	"github.com/alice/checkers/x/checkers/types"
 	"github.com/stretchr/testify/require"
 )
 
-func TestGenesisState_Validate(t *testing.T) {
+func TestMsgCreateGame_ValidateBasic(t *testing.T) {
 	tests := []struct {
-		desc     string
-		genState *types.GenesisState
-		valid    bool
+		name string
+		msg  types.MsgCreateGame
+		err  error
 	}{
 		{
-			desc:     "default is valid",
-			genState: types.DefaultGenesis(),
-			valid:    true,
+			name: "invalid creator address",
+			msg: types.MsgCreateGame{
+				Creator: "invalid_address",
+				Black:   sample.AccAddress(),
+				Red:     sample.AccAddress(),
+			},
+			err: sdkerrors.ErrInvalidAddress,
 		},
 		{
-			desc: "valid genesis state",
-			genState: &types.GenesisState{
-
-				SystemInfo: types.SystemInfo{
-					NextId: 41,
-				},
-				StoredGameList: []types.StoredGame{
-					{
-						Index: "0",
-					},
-					{
-						Index: "1",
-					},
-				},
-				// this line is used by starport scaffolding # types/genesis/validField
+			name: "invalid black address",
+			msg: types.MsgCreateGame{
+				Creator: sample.AccAddress(),
+				Black:   "invalid_address",
+				Red:     sample.AccAddress(),
 			},
-			valid: true,
+			err: sdkerrors.ErrInvalidAddress,
 		},
 		{
-			desc: "duplicated storedGame",
-			genState: &types.GenesisState{
-				StoredGameList: []types.StoredGame{
-					{
-						Index: "0",
-					},
-					{
-						Index: "0",
-					},
-				},
+			name: "invalid red address",
+			msg: types.MsgCreateGame{
+				Creator: sample.AccAddress(),
+				Black:   sample.AccAddress(),
+				Red:     "invalid_address",
 			},
-			valid: false,
+			err: sdkerrors.ErrInvalidAddress,
 		},
-		// this line is used by starport scaffolding # types/genesis/testcase
+		{
+			name: "valid addresses",
+			msg: types.MsgCreateGame{
+				Creator: sample.AccAddress(),
+				Black:   sample.AccAddress(),
+				Red:     sample.AccAddress(),
+			},
+		},
 	}
-	for _, tc := range tests {
-		t.Run(tc.desc, func(t *testing.T) {
-			err := tc.genState.Validate()
-			if tc.valid {
-				require.NoError(t, err)
-			} else {
-				require.Error(t, err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.msg.ValidateBasic()
+			if tt.err != nil {
+				require.ErrorIs(t, err, tt.err)
+				return
 			}
+			require.NoError(t, err)
 		})
 	}
 }
