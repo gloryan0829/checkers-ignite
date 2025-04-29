@@ -44,3 +44,28 @@ func TestCreate1GameHasSaved(t *testing.T) {
 		Red:   carol,
 	}, game1)
 }
+
+func TestCreate1GameEmitted(t *testing.T) {
+	_, msgSvr, context := setupMsgServer(t)
+
+	msgSvr.CreateGame(context, &types.MsgCreateGame{
+		Creator: alice,
+		Black:   bob,
+		Red:     carol,
+	})
+
+	ctx := sdk.UnwrapSDKContext(context)
+	require.NotNil(t, ctx)
+	events := sdk.StringifyEvents(ctx.EventManager().ABCIEvents())
+	require.Len(t, events, 1)
+	event := events[0]
+	require.EqualValues(t, sdk.StringEvent{
+		Type: types.GameCreatedEventType,
+		Attributes: []sdk.Attribute{
+			{Key: types.GameCreatedEventCreator, Value: alice},
+			{Key: types.GameCreatedEventGameIndex, Value: "1"},
+			{Key: types.GameCreatedEventBlack, Value: bob},
+			{Key: types.GameCreatedEventRed, Value: carol},
+		},
+	}, event)
+}
