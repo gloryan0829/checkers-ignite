@@ -239,3 +239,31 @@ func TestMsgPlayMove_ValidateBasic(t *testing.T) {
 		})
 	}
 }
+
+func TestPlayMoveSavedGame(t *testing.T) {
+	msgServer, keeper, context := setupMsgServerWithOneGameForPlayMove(t)
+	ctx := sdk.UnwrapSDKContext(context)
+	msgServer.PlayMove(context, &types.MsgPlayMove{
+		Creator:   bob,
+		GameIndex: "1",
+		FromX:     1,
+		FromY:     2,
+		ToX:       2,
+		ToY:       3,
+	})
+	systemInfo, found := keeper.GetSystemInfo(ctx)
+	require.True(t, found)
+	require.EqualValues(t, types.SystemInfo{
+		NextId: 2,
+	}, systemInfo)
+	game1, found := keeper.GetStoredGame(ctx, "1")
+	require.True(t, found)
+	require.EqualValues(t, types.StoredGame{
+		Index:  "1",
+		Board:  "*b*b*b*b|b*b*b*b*|***b*b*b|**b*****|********|r*r*r*r*|*r*r*r*r|r*r*r*r*",
+		Turn:   "r",
+		Black:  bob,
+		Red:    carol,
+		Winner: "*",
+	}, game1)
+}
