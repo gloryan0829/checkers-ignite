@@ -31,6 +31,6 @@ func (msg *MsgCreateGame) ValidateBasic() error {
 	if err != nil {
 		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid red address (%s)", err)
 	}
-	
+
 	return nil
 }

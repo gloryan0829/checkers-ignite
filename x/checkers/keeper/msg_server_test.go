@@ -2,8 +2,9 @@ package keeper_test
 
 import (
 	"context"
-	checkers "github.com/alice/checkers/x/checkers/module"
 	"testing"
+
+	checkers "github.com/alice/checkers/x/checkers/module"
 
 	"github.com/stretchr/testify/require"
 
